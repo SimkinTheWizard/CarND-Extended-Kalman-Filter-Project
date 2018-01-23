@@ -61,9 +61,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       * Remember: you'll need to convert radar from polar to cartesian coordinates.
     */
     // first measurement
-    cout << "EKF: " << endl;
-    ekf_.x_ = VectorXd(4);
-    ekf_.x_ << 1, 1, 1, 1;
+    //cout << "EKF: " << endl;
+    //ekf_.x_ = VectorXd(4);
+    //ekf_.x_ << 1, 1, 1, 1;
 	
 	  Eigen::MatrixXd F (4,4);
 	  F << 1, 0, 1, 0,
@@ -126,28 +126,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 	float dt  = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;
 	previous_timestamp_ = measurement_pack.timestamp_;
 	
-	float dt4 = (dt*dt*dt*dt)/4;
-	float dt3 = (dt*dt*dt)/2;
-	float dt2 = (dt*dt);
 	
 	float noise_ax = 10;
 	float noise_ay = 10;
 	
-	Eigen::MatrixXd F (4,4);
-	F << 1, 0, dt, 0,
-		 0, 1, 0,  dt,
-	     0, 0, 1,  0,
-	     0, 0, 0,  1;
-	
-	
-	Eigen::MatrixXd Q (4,4);
-	Q << dt4*noise_ax, 0, dt3*noise_ax, 0,
-		 0, dt4*noise_ay, 0, dt3*noise_ay,
-	     dt3*noise_ax, 0, dt2*noise_ax, 0,
-	     0, dt3*noise_ay, 0 ,dt2*noise_ay;
+	ekf_.UpdateF(dt);
+	ekf_.UpdateQ(dt, noise_ax, noise_ay);
 
-	ekf_.F_ = F;
-	ekf_.Q_ = Q;
 	if (dt >0)
         ekf_.Predict();
 
@@ -163,18 +148,18 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
-	  ekf_.H_ =  tools.CalculateJacobian(ekf_.x_);
-	  ekf_.R_ = R_radar_;
-	ekf_.UpdateEKF(measurement_pack.raw_measurements_,tools.ToPolar(ekf_.x_));
+	  ekf_.SetH(tools.CalculateJacobian(ekf_.GetX()));
+	  ekf_.SetR(R_radar_);
+	ekf_.UpdateEKF(measurement_pack.raw_measurements_,tools.ToPolar(ekf_.GetX()));
   } else {
     // Laser updates
-	  ekf_.H_ = H_laser_;
-	  ekf_.R_ = R_laser_;
+	  ekf_.SetH(H_laser_);
+	  ekf_.SetR(R_laser_);
 	ekf_.Update(measurement_pack.raw_measurements_);
   }
 
 	
   // print the output
-  cout << "x_ = " << ekf_.x_ << endl;
-  cout << "P_ = " << ekf_.P_ << endl;
+  cout << "x_ = " << ekf_.GetX() << endl;
+  cout << "P_ = " << ekf_.GetP() << endl;
 }

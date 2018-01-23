@@ -3,7 +3,7 @@
 #include "Eigen/Dense"
 
 class KalmanFilter {
-public:
+private:
 
   // state vector
   Eigen::VectorXd x_;
@@ -23,6 +23,7 @@ public:
   // measurement covariance matrix
   Eigen::MatrixXd R_;
 
+public:
   /**
    * Constructor
    */
@@ -33,6 +34,12 @@ public:
    */
   virtual ~KalmanFilter();
 
+   Eigen::VectorXd GetX();
+   Eigen::MatrixXd GetP();
+   void SetH(Eigen::MatrixXd H);
+   void SetR(Eigen::MatrixXd R);
+   void UpdateF(float dt);
+   void UpdateQ(float dt, float noise_ax, float noise_ay);
   /**
    * Init Initializes Kalman filter
    * @param x_in Initial state
