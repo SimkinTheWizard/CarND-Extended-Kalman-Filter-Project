@@ -29,10 +29,15 @@ public:
   */
   MatrixXd CalculateJacobian(const VectorXd& x_state);
 	
-	/*
-	 Convert polar cooordinates to catesian
-	 */
-	VectorXd ToCartesian(const VectorXd &polar_measurements);
+  /*
+  *	 Convert polar cooordinates to catesian
+  */
+  VectorXd ToCartesian(const VectorXd &polar_measurements);
+
+  /*
+   * Convert cartesian coordinates to polar
+  */
+  VectorXd ToPolar(const VectorXd &cartesian_measurements);
 
 };
 

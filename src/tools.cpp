@@ -5,6 +5,8 @@ using Eigen::VectorXd;
 using Eigen::MatrixXd;
 using std::vector;
 
+
+
 Tools::Tools() {}
 
 Tools::~Tools() {}
@@ -51,16 +53,9 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 	if (px*px + py*py < 0.00000001)
 		return Hj; // error
 	//compute the Jacobian matrix
-	/*
-	 Hj << px/(sqrt_squares),   py/(sqrt_squares),   0, 0,
+	Hj << px/(sqrt_squares),   py/(sqrt_squares),   0, 0,
 		  -py/sum_squares,     px/sum_squares,      0, 0,
           py*(vx*py-vy*px)/(c),px*(vy*px-vx*py)/(c), px/(sqrt_squares), py/(sqrt_squares);
-	 */
-	Hj << px/(sqrt_squares), py/(sqrt_squares), 0, 0,
-	-py/sum_squares, px/sum_squares, 0, 0,
-	py*(vx*py-vy*px)/(sum_squares*sqrt_squares),px*(vy*px-vx*py)/(sum_squares*sqrt_squares) , px/(sqrt_squares), py/(sqrt_squares);
-	
-
 	
 
 	
@@ -82,5 +77,22 @@ VectorXd Tools::ToCartesian(const VectorXd &polar_measurements) {
 	
 	cartesian << px, py, vx, vy;
 	return cartesian;
+}
+
+VectorXd Tools::ToPolar(const VectorXd &cartesian_measurements) {
+	VectorXd polar(3);
+	float px = cartesian_measurements[0];
+	float py = cartesian_measurements[1];
+	float vx = cartesian_measurements[2];
+	float vy = cartesian_measurements[3];
+	
+	float rho = sqrt(px*px+py*py);
+	float theta = px!=0? atan2(py,px) : 0;
+	float rho_dot = rho!=0? (px*vx+py*vy)/rho : 0;
+	
+
+	
+	polar << rho, theta, rho_dot;
+	return polar;
 }
 
